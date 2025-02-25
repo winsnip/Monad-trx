@@ -23,8 +23,8 @@ function getRandomAmount() {
   return ethers.utils.parseEther((Math.random() * (max - min) + min).toFixed(4));
 }
 
-function getRandomDelay(min = 3000, max = 10000) {
-  return Math.floor(Math.random() * (max - min + 1) + min);
+function getRandomDelay() {
+  return Math.floor(Math.random() * (3 * 60 * 1000 - 1 * 60 * 1000 + 1) + 1 * 60 * 1000);
 }
 
 async function wrapMON(amount) {
@@ -49,30 +49,29 @@ async function unwrapWMON(amount) {
   }
 }
 
-async function runSwapCycle(cycles = 4) {
+async function runSwapCycle(cycles = 1) {
   try {
     for (let i = 0; i < cycles; i++) {
       const randomAmount = getRandomAmount(); 
       const randomDelay = getRandomDelay(); 
 
       await wrapMON(randomAmount);
-      await new Promise(resolve => setTimeout(resolve, randomDelay));
       await unwrapWMON(randomAmount);
 
       if (i < cycles - 1) {
-        const cycleDelay = getRandomDelay();
-        console.log(`⏳ Waiting for ${(cycleDelay / 1000).toFixed(2)} seconds before next swap`.grey);
-        await new Promise(resolve => setTimeout(resolve, cycleDelay)); 
+        console.log(`⏳ Waiting for ${randomDelay / 1000 / 60} minutes`.grey);
+        await new Promise(resolve => setTimeout(resolve, randomDelay)); 
       }
     }
-    console.log("✅ Finished all swaps".green);
+    console.log("✅ Finished".green);
   } catch (error) {
     console.error("❌ Error during swap cycle:", error);
   }
 }
 
 (async () => {
-  await runSwapCycle(4);
+  await runSwapCycle(1);
 })();
 
 module.exports = { wrapMON, unwrapWMON };
+
