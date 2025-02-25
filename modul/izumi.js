@@ -6,9 +6,9 @@ const displayHeader = require("../src/banner.js");
 
 displayHeader();
 
-const RPC_URL = "https://testnet-rpc.monorail.xyz";
+const RPC_URL = "https://testnet-rpc.monad.xyz/";
 const EXPLORER_URL = "https://testnet.monadexplorer.com/tx";
-const PRIVATE_KEY = process.env.PRIVATE_KEY;
+const PRIVATE_KEY = process.env.PRIVATE_KEY; 
 const WMON_CONTRACT = "0x760AfE86e5de5fa0Ee542fc7B7B713e1c5425701";
 
 const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
@@ -31,26 +31,26 @@ function getRandomDelay() {
 
 async function wrapMON(amount) {
   try {
-    console.log("Starting Izumi".green);
-    console.log(`?? Wrap ${ethers.utils.formatEther(amount)} MON > WMON`.magenta);
+    console.log(`🪫 Starting Izumi ⏩⏩⏩⏩`.blue);
+    console.log(`🔄 Wrap ${ethers.utils.formatEther(amount)} MON > WMON`.magenta);
     const tx = await contract.deposit({ value: amount, gasLimit: 500000 });
-    console.log(`? Wrap MON > WMON successful`.green);
-    console.log(`? Hash: ${EXPLORER_URL}/${tx.hash}`.yellow);
+    console.log(`✅ Wrap MON > WMON successful`.green);
+    console.log(`➡️  Hash: ${EXPLORER_URL}/${tx.hash}`.grey);
     await tx.wait();
   } catch (error) {
-    console.error("? Error wrapping MON:".red, error);
+    console.error(`❌ Error wrapping MON:`.red, error);
   }
 }
 
 async function unwrapMON(amount) {
   try {
-    console.log(`?? Unwrap ${ethers.utils.formatEther(amount)} WMON > MON`.magenta);
+    console.log(`🔄 Unwrap ${ethers.utils.formatEther(amount)} WMON > MON`.magenta);
     const tx = await contract.withdraw(amount, { gasLimit: 500000 });
-    console.log(`? Unwrap WMON > MON successful`.green);
-    console.log(`? Hash: ${EXPLORER_URL}/${tx.hash}`.yellow);
+    console.log(`✅ Unwrap WMON > MON successful`.green);
+    console.log(`➡️  Hash: ${EXPLORER_URL}/${tx.hash}`.grey);
     await tx.wait();
   } catch (error) {
-    console.error("? Error unwrapping WMON:".red, error);
+    console.error(`❌ Error Unwrap:`.red, error);
   }
 }
 
@@ -62,16 +62,16 @@ async function runSwapCycle(cycles = 1) {
       await wrapMON(randomAmount);
       await unwrapMON(randomAmount);
       if (i < cycles - 1) {
-        console.log(`?? Wait ${randomDelay / 1000 / 60} minutes`.yellow);
+        console.log(`⏳ Wait ${randomDelay / 1000 / 60} minutes`.grey);
         await new Promise(resolve => setTimeout(resolve, randomDelay));
       }
     }
-    console.log("? Finished Izumi Swap".green);
+    console.log(`✅ Finished Izumi Swap`.green);
   } catch (error) {
-    console.error("? Error in runSwapCycle:".red, error);
+    console.error(`❌ Error in runSwapCycle:`.red, error);
   }
 }
 
 runSwapCycle().catch(error => {
-  console.error("? Unhandled error in runSwapCycle:".red, error);
+  console.error(`❌ Error SwapCycle:`.red, error);
 });

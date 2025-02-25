@@ -37,13 +37,14 @@ function getRandomDelay() {
 
 async function wrapMON(amount) {
   try {
+    console.log(` `);
     console.log(`🔄 Wrap ${ethers.utils.formatEther(amount)} MON > WMON`.magenta);
     const tx = await contract.deposit({ value: amount, gasLimit: 500000 });
     console.log(`✅ Wrap MON > WMON successful`.green);
-    console.log(`➡️ Hash: ${tx.hash}`.yellow);
+    console.log(`➡️  Hash: ${tx.hash}`.yellow);
     await tx.wait();
   } catch (error) {
-    console.error("❌ Error wrap MON:", error);
+    console.error(`❌ Error wrap MON:`.red, error);
   }
 }
 
@@ -52,10 +53,10 @@ async function unwrapMON(amount) {
     console.log(`🔄 Unwrap ${ethers.utils.formatEther(amount)} WMON > MON`.magenta);
     const tx = await contract.withdraw(amount, { gasLimit: 500000 });
     console.log(`✅ Unwrap WMON > MON successful`.green);
-    console.log(`➡️ Hash: ${tx.hash}`.yellow);
+    console.log(`➡️  Hash: ${tx.hash}`.yellow);
     await tx.wait();
   } catch (error) {
-    console.error("❌ Error unwrapping WMON:", error);
+    console.error(`❌ Error unwrapping WMON:`.red, error);
   }
 }
 
@@ -65,12 +66,12 @@ async function runSwapCycle(cycles = 1, interval = null) {
     const randomDelay = getRandomDelay();
     await wrapMON(randomAmount);
     await unwrapMON(randomAmount);
-    console.log(`⏳ Wait ${randomDelay / 1000 / 60} Minute`.red);
+    console.log(`⏳ Wait ${randomDelay / 1000 / 60} Minute`.grey);
     await new Promise((resolve) => setTimeout(resolve, randomDelay));
   }
 }
 
 (async () => {
-  console.log("Starting swap Rubic");
+  console.log(`🪫  Starting Rubic ⏩⏩⏩⏩`.blue);
   await runSwapCycle();
 })();

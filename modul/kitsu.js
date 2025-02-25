@@ -20,8 +20,9 @@ const STAKE_AMOUNT = ethers.utils.parseEther("0.1");
 const UNSTAKE_DELAY = 5 * 60 * 1000; 
 async function stakeMON() {
     try {
-        console.log("Starting Kitsu");
-        console.log(`?? Kitsu stake amount: ${ethers.utils.formatEther(STAKE_AMOUNT)} MON`);
+        console.log(`🪫  Starting Kitsu`.blue);
+        console.log(` `);
+        console.log(`🔄 stake: ${ethers.utils.formatEther(STAKE_AMOUNT)} MON`.magenta);
 
         const tx = {
             to: contractAddress,
@@ -30,23 +31,23 @@ async function stakeMON() {
             value: STAKE_AMOUNT,
         };
 
-        console.log(`?? STAKE`.red);
+        console.log(`✅ STAKE`.green);
         const txResponse = await wallet.sendTransaction(tx);
-        console.log(`?? Hash: ${txResponse.hash}`.yellow);
-        console.log(`?? Wait Confirmation`.green);
+        console.log(`➡️  Hash: ${txResponse.hash}`.yellow);
+        console.log(`⏳ Wait Confirmation`.grey);
         await txResponse.wait();
-        console.log("?? Stake DONE".green);
+        console.log(`✅ Stake DONE`.green);
 
         return STAKE_AMOUNT;
     } catch (error) {
-        console.error("? Staking failed:".red, error.message);
+        console.error(`❌ Staking failed:`.red, error.message);
         throw error;
     }
 }
 
 async function unstakeGMON(amountToUnstake) {
     try {
-        console.log(`Amount to unstake: ${ethers.utils.formatEther(amountToUnstake)} gMON`);
+        console.log(`✅ Unstake: ${ethers.utils.formatEther(amountToUnstake)} gMON`.green);
 
         const functionSelector = "0x6fed1ea7";
         const paddedAmount = ethers.utils.hexZeroPad(amountToUnstake.toHexString(), 32);
@@ -58,14 +59,14 @@ async function unstakeGMON(amountToUnstake) {
             gasLimit: ethers.utils.hexlify(gasLimitUnstake),
         };
 
-        console.log(`?? Unstake`.red);
+        console.log(`✅ Unstake`.green);
         const txResponse = await wallet.sendTransaction(tx);
-        console.log(`?? Hash: ${txResponse.hash}`.yellow);
-        console.log(`?? Wait Confirmation`.green);
+        console.log(`➡️  Hash: ${txResponse.hash}`.yellow);
+        console.log(`⏳ Wait Confirmation`.grey);
         await txResponse.wait();
-        console.log("?? Unstake DONE!".green);
+        console.log(`✅ Unstake DONE!`.green);
     } catch (error) {
-        console.error("? Unstaking failed:".red, error.message);
+        console.error(`❌ Unstaking failed:`.red, error.message);
         throw error;
     }
 }
@@ -75,11 +76,11 @@ const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 async function runAutoCycle() {
     try {
         const stakeAmount = await stakeMON();
-        console.log(`?? wait for 5 minutes before unstaking`.yellow);
+        console.log(`⏳ wait for 5 minutes before unstaking`.grey);
         await delay(UNSTAKE_DELAY); 
         await unstakeGMON(stakeAmount);
     } catch (error) {
-        console.error("Failed:".red, error.message);
+        console.error(`❌ Failed:`.red, error.message);
     }
 }
 

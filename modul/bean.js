@@ -1,6 +1,9 @@
 const { ethers } = require("ethers");
 const colors = require("colors");
 const cfonts = require("cfonts");
+const fs = require("fs");
+
+const { ROUTER_CONTRACT, WMON_CONTRACT, USDC_CONTRACT, BEAN_CONTRACT, JAI_CONTRACT, ABI } = require("../abi/BEAN.js");
 
 const displayHeader = require("../src/banner.js");
 
@@ -19,16 +22,14 @@ const RPC_URLS = [
 ];
 
 const CHAIN_ID = 10143;
-const UNISWAP_V2_ROUTER_ADDRESS = "0xCa810D095e90Daae6e867c19DF6D9A8C56db2c89";
-const WETH_ADDRESS = "0x760AfE86e5de5fa0Ee542fc7B7B713e1c5425701";
+const BEAN_SWAP_ROUTER_ADDRESS = ROUTER_CONTRACT; 
+const WETH_ADDRESS = WMON_CONTRACT; 
 
 const TOKEN_ADDRESSES = {
-    "DAC  ": "0x0f0bdebf0f83cd1ee3974779bcb7315f9808c714",
-    "USDT ": "0x88b8e2161dedc77ef4ab7585569d2415a1c1055d",
-    "WETH ": "0x836047a99e11f376522b447bffb6e3495dd0637c",
-    "MUK  ": "0x989d38aeed8408452f0273c7d4a17fef20878e62",
-    "USDC ": "0xf817257fed379853cDe0fa4F97AB987181B1E5Ea",
-    "CHOG ": "0xE0590015A873bF326bd645c3E1266d4db41C4E6B"
+    "WMON": WMON_CONTRACT, 
+    "USDC": USDC_CONTRACT, 
+    "BEAN": BEAN_CONTRACT,  
+    "JAI ": JAI_CONTRACT
 };
 
 const erc20Abi = [
@@ -41,7 +42,7 @@ async function connectToRpc() {
         try {
             const provider = new ethers.providers.JsonRpcProvider(url);
             await provider.getNetwork();
-            console.log(`🪫  Starting Uniswap ⏩⏩⏩⏩`.blue);
+            console.log(`🪫  Starting BeanSwap ⏩⏩⏩⏩`.blue);
             console.log(` `);
             return provider;
         } catch (error) {
@@ -50,6 +51,7 @@ async function connectToRpc() {
     }
     throw new Error(`❌ Unable to connect`.red);
 }
+
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -60,19 +62,7 @@ function getRandomEthAmount() {
 }
 
 async function swapEthForTokens(wallet, tokenAddress, amountInWei, tokenSymbol) {
-    const router = new ethers.Contract(UNISWAP_V2_ROUTER_ADDRESS, [
-        {
-            "name": "swapExactETHForTokens",
-            "type": "function",
-            "stateMutability": "payable",
-            "inputs": [
-                { "internalType": "uint256", "name": "amountOutMin", "type": "uint256" },
-                { "internalType": "address[]", "name": "path", "type": "address[]" },
-                { "internalType": "address", "name": "to", "type": "address" },
-                { "internalType": "uint256", "name": "deadline", "type": "uint256" }
-            ]
-        }
-    ], wallet);
+    const router = new ethers.Contract(BEAN_SWAP_ROUTER_ADDRESS, ABI, wallet); 
 
     try {
         console.log(`🔄 Swap ${ethers.utils.formatEther(amountInWei)} MON > ${tokenSymbol}`.green);
@@ -105,25 +95,12 @@ async function swapTokensForEth(wallet, tokenAddress, tokenSymbol) {
         return;
     }
 
-    const router = new ethers.Contract(UNISWAP_V2_ROUTER_ADDRESS, [
-        {
-            "name": "swapExactTokensForETH",
-            "type": "function",
-            "stateMutability": "nonpayable",
-            "inputs": [
-                { "internalType": "uint256", "name": "amountIn", "type": "uint256" },
-                { "internalType": "uint256", "name": "amountOutMin", "type": "uint256" },
-                { "internalType": "address[]", "name": "path", "type": "address[]" },
-                { "internalType": "address", "name": "to", "type": "address" },
-                { "internalType": "uint256", "name": "deadline", "type": "uint256" }
-            ]
-        }
-    ], wallet);
+    const router = new ethers.Contract(BEAN_SWAP_ROUTER_ADDRESS, ABI, wallet);
 
     try {
         console.log(`🔄 Swap ${tokenSymbol} > MON`.green);
 
-        await tokenContract.approve(UNISWAP_V2_ROUTER_ADDRESS, balance);
+        await tokenContract.approve(BEAN_SWAP_ROUTER_ADDRESS, balance);
 
         const nonce = await wallet.getTransactionCount("pending");
 
@@ -177,9 +154,11 @@ async function main() {
         console.log(` `);
         await sleep(delay);
     }
+
     console.log(" ");
     console.log(`🧿 All Token Reverse to MONAD`.white);
     console.log(" ");
+    
     for (const [tokenSymbol, tokenAddress] of Object.entries(TOKEN_ADDRESSES)) {
         await swapTokensForEth(wallet, tokenAddress, tokenSymbol);
     }

@@ -47,8 +47,9 @@ const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 async function stakeMON(cycleNumber) {
   try {
     const stakeAmount = getRandomAmount();
+
     console.log(
-      `Random stake?: ${ethers.utils.formatEther(stakeAmount)} MON`
+      `🔄 Stake: ${ethers.utils.formatEther(stakeAmount)} MON`.green
     );
 
     const data =
@@ -63,29 +64,30 @@ async function stakeMON(cycleNumber) {
       value: stakeAmount,
     };
 
-    console.log("?? Sending stake transaction");
+    console.log(`✅ Stake `.magenta);
     const txResponse = await wallet.sendTransaction(tx);
     console.log(
-      `?? Hash: ${txResponse.hash}`.yellow
+      `➡️  Hash: ${txResponse.hash}`.yellow
     );
 
-    console.log("Wait confirmation");
+    console.log(`🔄 Wait confirmation`.grey);
     const receipt = await txResponse.wait();
-    console.log(`??  Stake successful!`.green);
+    console.log(`✅ Stake successful!`.green);
 
     return { receipt, stakeAmount };
   } catch (error) {
-    console.error("? Staking failed:".red, error.message);
+    console.error(`❌ Staking failed:`.red, error.message);
     throw error;
   }
 }
 
 async function requestUnstakeAprMON(amountToUnstake, cycleNumber) {
   try {
+    console.error(` `);
     console.log(
-      `Amount unstake: ${ethers.utils.formatEther(
+      `🔄 unstake: ${ethers.utils.formatEther(
         amountToUnstake
-      )} aprMON`
+      )} aprMON`.green
     );
 
     const data =
@@ -101,19 +103,19 @@ async function requestUnstakeAprMON(amountToUnstake, cycleNumber) {
       value: ethers.utils.parseEther("0"),
     };
 
-    console.log("?? Sending unstake");
+    console.log(`🔄 Unstake`.magenta);
     const txResponse = await wallet.sendTransaction(tx);
     console.log(
-      `??  Hash: ${txResponse.hash}`.yellow
+      `➡️   Hash: ${txResponse.hash}`.yellow
     );
 
-    console.log("?? Wait confirmation");
+    console.log(`🔄 Wait confirmation`.grey);
     const receipt = await txResponse.wait();
-    console.log(`??  Unstake successful!`.green);
+    console.log(`✅ Unstake successful`.green);
 
     return receipt;
   } catch (error) {
-    console.error("? Unstake failed:".red, error.message);
+    console.error(`❌ Unstake failed:`.red, error.message);
     throw error;
   }
 }
@@ -121,14 +123,14 @@ async function requestUnstakeAprMON(amountToUnstake, cycleNumber) {
 async function checkClaimableStatus(walletAddress) {
   try {
     const apiUrl = `https://testnet.monadexplorer.com/api/v1/unstake-requests?address=${walletAddress}`;
-    const response = await axios.get(apiUrl);
+    const response = await axios.get(apiUrl, { timeout: 10000 });
 
     const claimableRequest = response.data.find(
       (request) => !request.claimed && request.is_claimable
     );
 
     if (claimableRequest) {
-      console.log(`Found claimable request ID: ${claimableRequest.id}`);
+      console.log(`✅ Found claimable: ${claimableRequest.id}`.green);
       return {
         id: claimableRequest.id,
         isClaimable: true,
@@ -140,7 +142,7 @@ async function checkClaimableStatus(walletAddress) {
     };
   } catch (error) {
     console.error(
-      "? Failed to check claimable status from API:".red,
+      `❌ Failed Claimable :`.red,
       error.message
     );
     return {
@@ -155,11 +157,11 @@ async function claimMON(cycleNumber) {
     const { id, isClaimable } = await checkClaimableStatus(wallet.address);
 
     if (!isClaimable || !id) {
-      console.log("No claimable withdrawals found at this time");
+      console.log(`❌ No claimable`.red);
       return null;
     }
 
-    console.log(`Claim withdrawal: ${id}`);
+    console.log(`✅ Claim withdrawal: ${id}`.green);
 
     const data =
       "0x492e47d2" +
@@ -177,17 +179,17 @@ async function claimMON(cycleNumber) {
       value: ethers.utils.parseEther("0"),
     };
 
-    console.log("Sending claim ");
+    console.log(`✅ Claim `.green);
     const txResponse = await wallet.sendTransaction(tx);
-    console.log(`Hash: ${txResponse.hash}`);
+    console.log(`➡️ Hash: ${txResponse.hash}`.grey);
 
-    console.log("Wait transaction confirmation");
+    console.log(`✅ Wait Confirmation`.green);
     const receipt = await txResponse.wait();
-    console.log(`Claim successful ID: ${id}`.green.underline);
+    console.log(`✅ Claim successful: ${id}`.green);
 
     return receipt;
   } catch (error) {
-    console.error("Claim failed:", error.message);
+    console.error(`❌ Claim failed:`.red, error.message);
     throw error;
   }
 }
@@ -198,16 +200,16 @@ async function runCycle(cycleNumber) {
 
     const delayTimeBeforeUnstake = getRandomDelay();
     console.log(
-      `?? Waiting for ${
+      `⏳ Wait ${
         delayTimeBeforeUnstake / 1000
-      } Seconds `
+      } Seconds`.grey
     );
     await delay(delayTimeBeforeUnstake);
 
     await requestUnstakeAprMON(stakeAmount, cycleNumber);
 
     console.log(
-      `Wait`.magenta
+      `✅ Wait`.green
     );
     await delay(660000);
 
@@ -216,7 +218,6 @@ async function runCycle(cycleNumber) {
 
     console.log();
   } catch (error) {
-    console.error(`? Cycle ${cycleNumber} failed:`.red, error.message);
     throw error;
   }
 }
@@ -227,7 +228,8 @@ async function getCycleCount() {
 
 async function main() {
   try {
-    console.log("Starting aPriori ".green);
+    console.log(`🪫  Starting Apriori ⏩⏩⏩⏩`.blue);
+    console.log(` `);
 
     const cycleCount = await getCycleCount();
 
