@@ -32,6 +32,11 @@
 (Press Ctrl + A, then D to keep the session running in the background.)
 
 
+**Update**
+ ```bash
+cd Monad-trx && rm package-lock.json && rm package.json && git pull --no-rebase && npm install
+ ```
+
 **Node.js Cleanup & Reinstallation**
    ```bash
 	sudo apt remove --purge nodejs npm libnode-dev -y
