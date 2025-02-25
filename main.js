@@ -12,11 +12,11 @@ async function loadChalk() {
 
   console.clear();
   displayHeader();
-  console.log(chalk.blueBright.bold("\n🚀 Jalankan Modul Auto\n"));
+  console.log(chalk.blueBright.bold("\nðŸš€ Jalankan Modul Auto\n"));
 
   const scripts = [
     { name: "Uniswap", path: "./modul/uniswap.js" },
-    { name: "Deploy Kontrak", path: "./modul/deploy.js" },
+    { name: "Deploy Kontrak", path: "./modul/deploy.mjs" },
     { name: "Rubic Swap", path: "./modul/rubic.js" },
     { name: "Bean Swap", path: "./modul/bean.js" },
     { name: "Magma Staking", path: "./modul/magma.js" },
@@ -28,27 +28,27 @@ async function loadChalk() {
     { name: "AutoSend", path: "./modul/AutoSend.js" },
   ];
 
-  console.log(chalk.yellow("🔹 Daftar Modul Tersedia 🔹\n"));
+  console.log(chalk.yellow("ðŸ”¹ Daftar Modul Tersedia ðŸ”¹\n"));
   scripts.forEach((script, index) => {
     console.log(chalk.green(`  [${index + 1}] ${script.name}`));
   });
   console.log("");
 
   async function runScript(script) {
-    console.log(chalk.yellow(`\n📜 Menjalankan: ${script.name}...`));
+    console.log(chalk.yellow(`\nðŸ“œ Menjalankan: ${script.name}...`));
 
     return new Promise((resolve, reject) => {
-      const process = spawn("node", [script.path]);
+      const process = spawn("node", script.path.endsWith(".mjs") ? ["--experimental-modules", script.path] : [script.path]);
 
       process.stdout.on("data", (data) => console.log(chalk.white(data.toString())));
       process.stderr.on("data", (data) => console.error(chalk.red(`Error: ${data.toString()}`)));
 
       process.on("close", (code) => {
         if (code === 0) {
-          console.log(chalk.green(`✅ Berhasil: ${script.name}`));
+          console.log(chalk.green(`âœ… Berhasil: ${script.name}`));
           resolve();
         } else {
-          console.error(chalk.red(`❌ Gagal: ${script.name} (Kode keluar: ${code})`));
+          console.error(chalk.red(`âŒ Gagal: ${script.name} (Kode keluar: ${code})`));
           reject(new Error(`Modul ${script.name} gagal`));
         }
       });
@@ -57,12 +57,12 @@ async function loadChalk() {
 
   async function runScriptsSequentially(loopCount, selectedScripts) {
     for (let i = 0; i < loopCount; i++) {
-      console.log(chalk.blueBright(`\n🔄 Loop ${i + 1} dari ${loopCount}...\n`));
+      console.log(chalk.blueBright(`\nðŸ”„ Loop ${i + 1} dari ${loopCount}...\n`));
       for (const script of selectedScripts) {
         try {
           await runScript(script);
         } catch (error) {
-          console.error(chalk.red(`⚠️ Melewati ${script.name} karena error`));
+          console.error(chalk.red(`âš ï¸ Melewati ${script.name} karena error`));
         }
       }
     }
@@ -75,8 +75,8 @@ async function loadChalk() {
       message: "Pilih modul yang ingin dijalankan (gunakan spasi untuk memilih):",
       instructions: `
       Instruksi:
-      - Gunakan panah atas/bawah (↑/↓) untuk memilih
-      - Tekan spasi (␣) untuk memilih atau menghapus pilihan
+      - Gunakan panah atas/bawah (â†‘/â†“) untuk memilih
+      - Tekan spasi (â£) untuk memilih atau menghapus pilihan
       - Tekan "a" untuk memilih semua
       - Tekan Enter untuk melanjutkan`,
       choices: scripts.map(script => ({
@@ -95,11 +95,11 @@ async function loadChalk() {
       initial: 1
     });
 
-    console.log(chalk.green(`\n🚀 Memulai eksekusi ${selectedModules.length} modul selama ${loopCount} loop\n`));
+    console.log(chalk.green(`\nðŸš€ Memulai eksekusi ${selectedModules.length} modul selama ${loopCount} loop\n`));
 
     await runScriptsSequentially(loopCount, selectedModules);
 
-    console.log(chalk.green.bold("\n✅✅ Semua modul selesai dijalankan! ✅✅\n"));
+    console.log(chalk.green.bold("\nâœ…âœ… Semua modul selesai dijalankan! âœ…âœ…\n"));
   }
 
   main();
