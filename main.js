@@ -23,6 +23,7 @@ async function loadChalk() {
     { name: "aPriori Staking", path: "./modul/apriori.js" },
     { name: "Bebop Swap", path: "./modul/bebop.js" },
     { name: "Monorail", path: "./modul/mono.js" },
+    { name: "Hashflow Swap", path: "./modul/hash.js" },
     { name: "Kitsu", path: "./modul/kitsu.js" },
     { name: "AutoSend", path: "./modul/AutoSend.js" },
   ];
