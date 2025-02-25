@@ -1,18 +1,17 @@
-import dotenv from 'dotenv';
-import { ethers } from 'ethers';
+import { config } from "dotenv";
+import { ethers } from "ethers";
 import solc from "solc";
+import chalk from "chalk";
+import ora from "ora";
 import readline from "readline";
-import ora from 'ora';
 
-// Panggil dotenv.config() di sini
-dotenv.config();
+config();
 
-// Pastikan variabel lingkungan ada
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const RPC_URL = "https://testnet-rpc.monad.xyz";
 
 if (!PRIVATE_KEY || !RPC_URL) {
-    console.log("? Missing environment variables!");
+    console.log(chalk.red.bold("❌ Missing environment variables!"));
     process.exit(1);
 }
 
@@ -42,12 +41,12 @@ const planets = [
     "Aoede", "Thelxinoe", "Arche", "Kallichore", "Helike", "Carpo", "Eukelade", "Cyllene", "Kore", "Herse",
     "Dia", "S2003J2", "S2003J3", "S2003J4", "S2003J5", "S2003J9", "S2003J10", "S2003J12", "S2003J15"
 ];
+
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
 });
 
-// Fungsi untuk membuat nama acak
 function generateRandomName() {
     const combinedTerms = [...chemicalTerms, ...planets];
     const shuffled = combinedTerms.sort(() => 0.5 - Math.random());
@@ -73,7 +72,6 @@ contract Counter {
 }
 `;
 
-// Fungsi untuk kompilasi kontrak
 function compileContract() {
     const spinner = ora("Compiling contract...").start();
 
@@ -88,63 +86,64 @@ function compileContract() {
 
         const contract = output.contracts["Counter.sol"].Counter;
 
-        spinner.succeed("Contract compiled successfully!");
+        spinner.succeed(chalk.green("Contract compiled successfully!"));
         return { abi: contract.abi, bytecode: contract.evm.bytecode.object };
     } catch (error) {
-        spinner.fail("Contract compilation failed!");
+        spinner.fail(chalk.red("Contract compilation failed!"));
         console.error(error);
         process.exit(1);
     }
 }
 
-// Fungsi untuk deploy kontrak
 async function deployContract(contractName) {
     const { abi, bytecode } = compileContract();
     const spinner = ora(`Deploying contract ${contractName} to blockchain...`).start();
 
     try {
         const nonce = await provider.getTransactionCount(wallet.address, "latest");
-        console.log(`Using nonce: ${nonce}`);
+        console.log(chalk.gray(`Using nonce: ${nonce}`));
 
         const factory = new ethers.ContractFactory(abi, bytecode, wallet);
-        const contract = await factory.deploy(); 
+        const contract = await factory.deploy();
 
-        console.log("? Waiting for transaction confirmation...");
+        console.log("⏳ Waiting for transaction confirmation...");
         const txReceipt = await contract.deployTransaction.wait();
 
-        spinner.succeed(`Contract ${contractName} deployed successfully!`);
-        console.log("\n?? Contract Address: " + contract.address);
-        console.log("\n?? Transaction Hash: " + txReceipt.transactionHash);
-        console.log("\n? Deployment complete! ??\n");
+        if (!txReceipt) {
+            console.log("Failed to get transaction receipt.");
+            process.exit(1);
+        }
+
+        if (txReceipt.status !== 1) {
+            console.log(chalk.red("Deployment failed!"));
+            process.exit(1);
+        } else {
+            spinner.succeed(chalk.green(`Contract ${contractName} deployed successfully!`));
+            console.log(chalk.cyan.bold("\n📌 Contract Address: ") + chalk.yellow(contract.address));
+            console.log(chalk.cyan.bold("\n📜 Transaction Hash: ") + chalk.yellow(txReceipt.transactionHash));
+            console.log(chalk.green("\n✅ Deployment complete! 🎉\n"));
+        }
     } catch (error) {
-        spinner.fail("Deployment failed!");
+        spinner.fail(chalk.red("Deployment failed!"));
         console.error(error);
         process.exit(1);
     }
 }
 
-// Fungsi utama untuk menjalankan script
-async function main() {
-    console.log("???  Starting Deploy Contract ????????");
-    console.log(" ");
+console.log(chalk.blue("🚀 Starting Deploy Contract ©©©©"));
+console.log(" ");
 
-    const numberOfContracts = 5;
+const numberOfContracts = 5;
 
-    for (let i = 0; i < numberOfContracts; i++) {
-        const contractName = generateRandomName();
-        console.log(`\n?? Deploying contract ${i + 1}/${numberOfContracts}: ${contractName}`);
-        await deployContract(contractName);
+for (let i = 0; i < numberOfContracts; i++) {
+    const contractName = generateRandomName();
+    console.log(chalk.yellow(`\n🔨 Deploying contract ${i + 1}/${numberOfContracts}: ${contractName}`));
+    await deployContract(contractName);
 
-        const delay = Math.floor(Math.random() * (6000 - 4000 + 1)) + 4000;
-        console.log(`? Waiting for ${delay / 1000} Seconds`);
-        await new Promise((resolve) => setTimeout(resolve, delay));
-    }
-
-    console.log("\n? All contracts deployed successfully! ??\n");
+    const delay = Math.floor(Math.random() * (6000 - 4000 + 1)) + 4000;
+    console.log(chalk.gray(`⏳ Waiting for ${delay / 1000} Seconds`));
+    await new Promise((resolve) => setTimeout(resolve, delay));
 }
 
-// Call the main function
-main().catch((error) => {
-    console.error(error);
-    process.exit(1);
-});
+console.log(chalk.green.bold("\n✅ All contracts deployed successfully! 🎉\n"));
+process.exit(0);
