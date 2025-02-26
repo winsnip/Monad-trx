@@ -6,13 +6,11 @@ async function loadChalk() {
   return (await import("chalk")).default;
 }
 
-
 (async () => {
   const chalk = await loadChalk();
-
   console.clear();
   displayHeader();
-  console.log(chalk.blueBright.bold("\nðŸš€ Jalankan Modul Auto\n"));
+  console.log(chalk.blueBright.bold("\n🚀 Jalankan Modul Auto\n"));
 
   const scripts = [
     { name: "Uniswap", path: "./modul/uniswap.js" },
@@ -28,15 +26,8 @@ async function loadChalk() {
     { name: "AutoSend", path: "./modul/AutoSend.js" },
   ];
 
-  console.log(chalk.yellow("ðŸ”¹ Daftar Modul Tersedia ðŸ”¹\n"));
-  scripts.forEach((script, index) => {
-    console.log(chalk.green(`  [${index + 1}] ${script.name}`));
-  });
-  console.log("");
-
   async function runScript(script) {
-    console.log(chalk.yellow(`\nðŸ“œ Menjalankan: ${script.name}...`));
-
+    console.log(chalk.yellow(`\n📜 Menjalankan: ${script.name}...`));
     return new Promise((resolve, reject) => {
       const process = spawn("node", script.path.endsWith(".mjs") ? ["--experimental-modules", script.path] : [script.path]);
 
@@ -45,10 +36,10 @@ async function loadChalk() {
 
       process.on("close", (code) => {
         if (code === 0) {
-          console.log(chalk.green(`âœ… Berhasil: ${script.name}`));
+          console.log(chalk.green(`✅ Berhasil: ${script.name}`));
           resolve();
         } else {
-          console.error(chalk.red(`âŒ Gagal: ${script.name} (Kode keluar: ${code})`));
+          console.error(chalk.red(`❌ Gagal: ${script.name} (Kode keluar: ${code})`));
           reject(new Error(`Modul ${script.name} gagal`));
         }
       });
@@ -57,12 +48,12 @@ async function loadChalk() {
 
   async function runScriptsSequentially(loopCount, selectedScripts) {
     for (let i = 0; i < loopCount; i++) {
-      console.log(chalk.blueBright(`\nðŸ”„ Loop ${i + 1} dari ${loopCount}...\n`));
+      console.log(chalk.blueBright(`\n🔄 Loop ${i + 1} dari ${loopCount}...\n`));
       for (const script of selectedScripts) {
         try {
           await runScript(script);
         } catch (error) {
-          console.error(chalk.red(`âš ï¸ Melewati ${script.name} karena error`));
+          console.error(chalk.red(`⚠️ Melewati ${script.name} karena error`));
         }
       }
     }
@@ -70,20 +61,15 @@ async function loadChalk() {
 
   async function main() {
     const { selectedModules } = await prompts({
-      type: "multiselect",
+      type: "autocompleteMultiselect",
       name: "selectedModules",
-      message: "Pilih modul yang ingin dijalankan (gunakan spasi untuk memilih):",
-      instructions: `
-      Instruksi:
-      - Gunakan panah atas/bawah (â†‘/â†“) untuk memilih
-      - Tekan spasi (â£) untuk memilih atau menghapus pilihan
-      - Tekan "a" untuk memilih semua
-      - Tekan Enter untuk melanjutkan`,
+      message: "Pilih modul yang ingin dijalankan:",
       choices: scripts.map(script => ({
         title: script.name,
         value: script,
         selected: true
       })),
+      hint: "Gunakan panah atas/bawah untuk navigasi, spasi untuk memilih, dan ketik untuk mencari",
       min: 1
     });
 
@@ -91,15 +77,15 @@ async function loadChalk() {
       type: "number",
       name: "loopCount",
       message: "Berapa kali ingin menjalankan modul?",
-      validate: (value) => (value > 0 ? true : "Masukkan angka lebih dari 0"),
+      validate: value => (value > 0 ? true : "Masukkan angka lebih dari 0"),
       initial: 1
     });
 
-    console.log(chalk.green(`\nðŸš€ Memulai eksekusi ${selectedModules.length} modul selama ${loopCount} loop\n`));
+    console.log(chalk.green(`\n🚀 Memulai eksekusi ${selectedModules.length} modul selama ${loopCount} loop\n`));
 
     await runScriptsSequentially(loopCount, selectedModules);
 
-    console.log(chalk.green.bold("\nâœ…âœ… Semua modul selesai dijalankan! âœ…âœ…\n"));
+    console.log(chalk.green.bold("\n✅✅ Semua modul selesai dijalankan! ✅✅\n"));
   }
 
   main();
